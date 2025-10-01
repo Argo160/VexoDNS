@@ -12,6 +12,11 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.example.vexodns.databinding.ActivityMainBinding
+import android.content.Context
+import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.navigation.ui.NavigationUI
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,7 +42,23 @@ class MainActivity : AppCompatActivity() {
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
+//navView.setupWithNavController(navController)
+        navView.setNavigationItemSelectedListener { menuItem ->
+            // Close the navigation drawer
+            binding.drawerLayout.closeDrawers()
+
+            when (menuItem.itemId) {
+                R.id.nav_sub -> { // <-- Use the ID of your subscription item
+                    // Show our custom dialog
+                    showAddLinkDialog()
+                    true // Mark as handled
+                }
+                else -> {
+                    // Let the Navigation Component handle other items
+                    NavigationUI.onNavDestinationSelected(menuItem, navController)
+                }
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -49,5 +70,35 @@ class MainActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+    private fun showAddLinkDialog() {
+        // Inflate the custom layout
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_link, null)
+        val editTextLink = dialogView.findViewById<EditText>(R.id.edit_text_link)
+
+        // Build the dialog
+        val builder = AlertDialog.Builder(this)
+        builder.setView(dialogView)
+        builder.setTitle("افزودن لینک اشتراک")
+        builder.setPositiveButton("اوکی") { _, _ ->
+            val link = editTextLink.text.toString()
+            if (link.isNotBlank()) {
+                // Save the link using SharedPreferences
+                val sharedPref = getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+                with(sharedPref.edit()) {
+                    putString("subscription_link", link)
+                    apply()
+                }
+                Toast.makeText(this, "لینک ذخیره شد", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "لینک نمی‌تواند خالی باشد", Toast.LENGTH_SHORT).show()
+            }
+        }
+        builder.setNegativeButton("لغو") { dialog, _ ->
+            dialog.cancel()
+        }
+
+        // Show the dialog
+        builder.create().show()
     }
 }
