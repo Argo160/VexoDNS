@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val sharedPref = getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("VexoDNSPrefs", MODE_PRIVATE)
         val langCode = sharedPref.getString("app_language", null) // Get saved language
         if (langCode != null) {
             val localeList = LocaleListCompat.forLanguageTags(langCode)
@@ -74,9 +74,9 @@ class MainActivity : AppCompatActivity() {
     // Add this function inside MainActivity class
     fun setDrawerEnabled(enabled: Boolean) {
         val lockMode = if (enabled) {
-            androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED
+            DrawerLayout.LOCK_MODE_UNLOCKED
         } else {
-            androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED
+            DrawerLayout.LOCK_MODE_LOCKED_CLOSED
         }
         binding.drawerLayout.setDrawerLockMode(lockMode)
     }
@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
         val languageCodes = arrayOf("en", "fa", "ru", "zh")
 
         // --- Step 1: Find the index of the currently selected language ---
-        val sharedPref = getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("VexoDNSPrefs", MODE_PRIVATE)
         val currentLangCode = sharedPref.getString("app_language", "en") // Default to English "en"
         var checkedItem = languageCodes.indexOf(currentLangCode)
         if (checkedItem == -1) {
@@ -131,7 +131,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setAppLocale(languageCode: String) {
         // 1. Save the selected language code
-        val sharedPref = getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("VexoDNSPrefs", MODE_PRIVATE)
         with(sharedPref.edit()) {
             putString("app_language", languageCode)
             apply()
@@ -146,7 +146,7 @@ class MainActivity : AppCompatActivity() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_link, null)
         val editTextLink = dialogView.findViewById<EditText>(R.id.edit_text_link)
         // Read the saved link from SharedPreferences
-        val sharedPref = getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("VexoDNSPrefs", MODE_PRIVATE)
         val savedLink = sharedPref.getString("subscription_link", null)
 
         // Set the saved link into the EditText if it exists
@@ -161,7 +161,7 @@ class MainActivity : AppCompatActivity() {
         val link = editTextLink.text.toString()
             if (link.isNotBlank()) {
                 // Save the link using SharedPreferences
-                val sharedPref = getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+                val sharedPref = getSharedPreferences("VexoDNSPrefs", MODE_PRIVATE)
                 with(sharedPref.edit()) {
                     putString("subscription_link", link)
                     apply()
