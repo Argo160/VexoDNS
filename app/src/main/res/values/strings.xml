@@ -3,7 +3,7 @@
     <string name="window_title">Vexo Subscription Checker</string>
     <string name="url_label">Enter the full subscription link:</string>
     <string name="fetch_button">Check Information</string>
-    <string name="fetch_button_loading">Checking...</string>
+    <string name="fetch_button_loading">Checking…</string>
     <string name="username_header">Username</string>
     <string name="status_header">Subscription Status</string>
     <string name="time_header">Time Remaining</string>
@@ -19,7 +19,7 @@
     <string name="status_expired">⛔️ Expired</string>
     <string name="unlimited">Unlimited</string>
     <string name="time_format">%1$d d, %2$d h</string>
-    <string name="connecting_status">Connecting &amp; Checking IP...</string>
+    <string name="connecting_status">Connecting &amp; Checking IP…</string>
     <string name="success_status">Information received successfully.</string>
     <string name="ip_update_success">Your IP was successfully registered.</string>
     <string name="ip_update_fail">Error registering IP (Subscription info is shown).</string>
@@ -45,11 +45,11 @@
     <string name="admin_required_title">Administrator Access Required</string>
     <string name="admin_required_message">To change DNS settings, the application must be run as an Administrator.\nPlease close and re-run the program using \'Run as administrator\'.</string>
     <string name="dns_set_fail_message">Failed to set DNS. Please check your internet connection and run as Administrator.</string>
-    <string name="connect_dns_button_loading">Setting...</string>
+    <string name="connect_dns_button_loading">Setting…</string>
     <string name="no_active_interface">No active network connection was found to set DNS.</string>
     <string name="timer_text">Please wait 1 minute for the new IP to be set on the server. Time remaining: %1$d seconds</string>
     <string name="unset_dns_button">Unset DNS</string>
-    <string name="unset_dns_button_loading">Unsetting...</string>
+    <string name="unset_dns_button_loading">Unsetting…</string>
     <string name="dns_unset_success_title">Success</string>
     <string name="dns_unset_success_message">DNS settings were successfully reset to automatic (DHCP).</string>
     <string name="dns_unset_fail_message">Failed to reset DNS settings for active network interfaces.</string>

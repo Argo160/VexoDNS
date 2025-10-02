@@ -3,7 +3,7 @@
     <string name="window_title">Vexo 订阅检查器</string>
     <string name="url_label">请输入完整的订阅链接：</string>
     <string name="fetch_button">检查信息</string>
-    <string name="fetch_button_loading">正在检查...</string>
+    <string name="fetch_button_loading">正在检查…</string>
     <string name="username_header">用户名</string>
     <string name="status_header">订阅状态</string>
     <string name="time_header">剩余时间</string>
@@ -19,7 +19,7 @@
     <string name="status_expired">⛔️ 已过期</string>
     <string name="unlimited">无限</string>
     <string name="time_format">%1$d天 %2$d小时</string>
-    <string name="connecting_status">正在连接并检查IP...</string>
+    <string name="connecting_status">正在连接并检查IP…</string>
     <string name="success_status">信息接收成功。</string>
     <string name="ip_update_success">您的IP已成功注册。</string>
     <string name="ip_update_fail">注册IP时出错 (订阅信息已显示)。</string>
@@ -45,11 +45,11 @@
     <string name="admin_required_title">需要管理员权限</string>
     <string name="admin_required_message">要更改DNS设置，应用程序必须以管理员身份运行。\n请关闭并使用“以管理员身份运行”重新运行程序。</string>
     <string name="dns_set_fail_message">设置DNS失败。请检查您的网络连接并以管理员身份运行。</string>
-    <string name="connect_dns_button_loading">正在设置...</string>
+    <string name="connect_dns_button_loading">正在设置…</string>
     <string name="no_active_interface">未找到用于设置DNS的活动网络连接。</string>
     <string name="timer_text">请等待1分钟，以便在服务器上设置新的IP。剩余时间：%1$d秒</string>
     <string name="unset_dns_button">取消DNS</string>
-    <string name="unset_dns_button_loading">正在取消...</string>
+    <string name="unset_dns_button_loading">正在取消…</string>
     <string name="dns_unset_success_title">成功</string>
     <string name="dns_unset_success_message">DNS设置已成功重置为自动 (DHCP)。</string>
     <string name="dns_unset_fail_message">重置活动网络接口的DNS设置失败。</string>

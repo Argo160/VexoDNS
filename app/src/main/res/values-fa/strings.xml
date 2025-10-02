@@ -3,7 +3,7 @@
     <string name="window_title">بررسی اشتراک Vexo</string>
     <string name="url_label">لینک کامل اشتراک را وارد کنید:</string>
     <string name="fetch_button">بررسی اطلاعات</string>
-    <string name="fetch_button_loading">در حال بررسی...</string>
+    <string name="fetch_button_loading">در حال بررسی…</string>
     <string name="username_header">نام کاربری</string>
     <string name="status_header">وضعیت اشتراک</string>
     <string name="time_header">زمان باقی‌مانده</string>
@@ -19,7 +19,7 @@
     <string name="status_expired">⛔️ منقضی شده</string>
     <string name="unlimited">نامحدود</string>
     <string name="time_format">%1$d روز و %2$d ساعت</string>
-    <string name="connecting_status">در حال اتصال و بررسی آی‌پی...</string>
+    <string name="connecting_status">در حال اتصال و بررسی آی‌پی…</string>
     <string name="success_status">اطلاعات با موفقیت دریافت شد.</string>
     <string name="ip_update_success">آی‌پی شما با موفقیت ثبت شد.</string>
     <string name="ip_update_fail">خطا در ثبت آی‌پی (اطلاعات اشتراک نمایش داده می‌شود).</string>
@@ -45,11 +45,11 @@
     <string name="admin_required_title">نیاز به دسترسی ادمین</string>
     <string name="admin_required_message">برای تغییر تنظیمات DNS، برنامه باید با دسترسی ادمین اجرا شود.\nلطفاً برنامه را بسته و مجدداً با \'Run as administrator\' اجرا کنید.</string>
     <string name="dns_set_fail_message">تنظیم DNS ناموفق بود. لطفاً اتصال اینترنت خود را بررسی کرده و برنامه را با دسترسی ادمین اجرا کنید.</string>
-    <string name="connect_dns_button_loading">در حال تنظیم...</string>
+    <string name="connect_dns_button_loading">در حال تنظیم…</string>
     <string name="no_active_interface">هیچ اتصال شبکه فعالی برای تنظیم DNS یافت نشد.</string>
     <string name="timer_text">لطفاً ۱ دقیقه صبر کنید تا آی‌پی جدید روی سرور تنظیم شود. زمان باقی‌مانده: %1$d ثانیه</string>
     <string name="unset_dns_button">لغو DNS</string>
-    <string name="unset_dns_button_loading">در حال لغو...</string>
+    <string name="unset_dns_button_loading">در حال لغو…</string>
     <string name="dns_unset_success_title">موفقیت</string>
     <string name="dns_unset_success_message">تنظیمات DNS با موفقیت به حالت خودکار (DHCP) بازنشانی شد.</string>
     <string name="dns_unset_fail_message">بازنشانی تنظیمات DNS برای اتصال‌های شبکه فعال ناموفق بود.</string>

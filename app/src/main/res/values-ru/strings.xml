@@ -3,7 +3,7 @@
     <string name="window_title">Проверка подписки Vexo</string>
     <string name="url_label">Введите полную ссылку на подписку:</string>
     <string name="fetch_button">Проверить информацию</string>
-    <string name="fetch_button_loading">Проверка...</string>
+    <string name="fetch_button_loading">Проверка…</string>
     <string name="username_header">Пользователь</string>
     <string name="status_header">Статус</string>
     <string name="time_header">Время</string>
@@ -19,7 +19,7 @@
     <string name="status_expired">⛔️ Истекла</string>
     <string name="unlimited">Безлимитно</string>
     <string name="time_format">%1$d дн. и %2$d ч.</string>
-    <string name="connecting_status">Подключение и проверка IP...</string>
+    <string name="connecting_status">Подключение и проверка IP…</string>
     <string name="success_status">Информация успешно получена.</string>
     <string name="ip_update_success">Ваш IP был успешно зарегистрирован.</string>
     <string name="ip_update_fail">Ошибка регистрации IP (информация о подписке показана).</string>
@@ -45,11 +45,11 @@
     <string name="admin_required_title">Требуются права администратора</string>
     <string name="admin_required_message">Для изменения настроек DNS приложение необходимо запустить от имени администратора.\nПожалуйста, закройте и перезапустите программу, используя «Запуск от имени администратора».</string>
     <string name="dns_set_fail_message">Не удалось установить DNS. Пожалуйста, проверьте подключение к интернету и запустите от имени администратора.</string>
-    <string name="connect_dns_button_loading">Установка...</string>
+    <string name="connect_dns_button_loading">Установка…</string>
     <string name="no_active_interface">Не найдено активного сетевого подключения для установки DNS.</string>
     <string name="timer_text">Пожалуйста, подождите 1 минуту для установки нового IP на сервере. Оставшееся время: %1$d секунд</string>
     <string name="unset_dns_button">Сбросить DNS</string>
-    <string name="unset_dns_button_loading">Сброс...</string>
+    <string name="unset_dns_button_loading">Сброс…</string>
     <string name="dns_unset_success_title">Успех</string>
     <string name="dns_unset_success_message">Настройки DNS были успешно сброшены до автоматических (DHCP).</string>
     <string name="dns_unset_fail_message">Не удалось сбросить настройки DNS для активных сетевых интерфейсов.</string>
