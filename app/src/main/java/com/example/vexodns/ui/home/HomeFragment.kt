@@ -63,7 +63,7 @@ class HomeFragment : Fragment() {
     }
     private fun fetchSubscriptionData() {
         val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE) ?: return
-        var originalUrl = sharedPref?.getString("subscription_link", null)
+        val originalUrl = sharedPref.getString("subscription_link", null)
 
         if (originalUrl.isNullOrBlank()) {
             Toast.makeText(context, getString(R.string.warning_text), Toast.LENGTH_LONG).show()
