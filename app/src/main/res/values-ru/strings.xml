@@ -61,4 +61,6 @@
     <string name="link_saved_success">Ссылка успешно сохранена</string>
     <string name="link_cannot_be_empty">Ссылка не может быть пустой</string>
     <string name="select_language_title">Выберите язык</string>
+    <string name="status_connected">Подключено</string>
+    <string name="status_not_connected">Не подключено</string>
 </resources>

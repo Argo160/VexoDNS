@@ -61,4 +61,6 @@
     <string name="link_saved_success">لینک با موفقیت ذخیره شد</string>
     <string name="link_cannot_be_empty">لینک نمی‌تواند خالی باشد</string>
     <string name="select_language_title">انتخاب زبان</string>
+    <string name="status_connected">متصل</string>
+    <string name="status_not_connected">غیرمتصل</string>
 </resources>

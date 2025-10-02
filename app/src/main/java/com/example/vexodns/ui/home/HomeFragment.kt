@@ -22,9 +22,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.text.DecimalFormat
 import android.os.CountDownTimer
+import android.widget.AdapterView
 import com.example.vexodns.MainActivity
 
 class HomeFragment : Fragment() {
+    private var isConnected = false
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -49,9 +51,35 @@ class HomeFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loadLastData()
-    }
+        loadLastData() // This line is already there
 
+        // --- ADD THE SPINNER LOGIC HERE ---
+        binding.dnsTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selectedDnsType = parent?.getItemAtPosition(position).toString()
+                // For now, we just show a Toast message to confirm it's working
+                Toast.makeText(requireContext(), "Selected: $selectedDnsType", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // This is usually not needed
+            }
+        }
+        binding.connectButtonLayout.setOnClickListener {
+            isConnected = !isConnected // Toggle the state
+            updateButtonState()
+        }
+        updateButtonState()
+    }
+    private fun updateButtonState() {
+        if (isConnected) {
+            binding.connectButtonLayout.setBackgroundResource(R.drawable.button_background_connected)
+            binding.connectStatusText.text = getString(R.string.status_connected)
+        } else {
+            binding.connectButtonLayout.setBackgroundResource(R.drawable.button_background_disconnected)
+            binding.connectStatusText.text = getString(R.string.status_not_connected)
+        }
+    }
     private fun loadLastData() {
         val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE) ?: return
         val lastDataJson = sharedPref.getString("last_sub_data", null)

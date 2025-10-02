@@ -61,4 +61,6 @@
     <string name="link_saved_success">链接已成功保存</string>
     <string name="link_cannot_be_empty">链接不能为空</string>
     <string name="select_language_title">选择语言</string>
+    <string name="status_connected">已连接</string>
+    <string name="status_not_connected">未连接</string>
 </resources>
