@@ -18,7 +18,7 @@
     <string name="status_limited">⚠️ Volume Reached</string>
     <string name="status_expired">⛔️ Expired</string>
     <string name="unlimited">Unlimited</string>
-    <string name="time_format">%1$d days and %2$d hours</string>
+    <string name="time_format">%1$d d, %2$d h</string>
     <string name="connecting_status">Connecting &amp; Checking IP...</string>
     <string name="success_status">Information received successfully.</string>
     <string name="ip_update_success">Your IP was successfully registered.</string>
@@ -60,4 +60,5 @@
     <string name="menu_language">Language</string>
     <string name="link_saved_success">Link saved successfully</string>
     <string name="link_cannot_be_empty">Link cannot be empty</string>
+    <string name="select_language_title">Select Language</string>
 </resources>

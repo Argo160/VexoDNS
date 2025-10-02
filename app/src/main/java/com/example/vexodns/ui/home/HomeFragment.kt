@@ -16,7 +16,7 @@ import com.example.vexodns.data.UpdateIpRequest
 import com.example.vexodns.databinding.FragmentHomeBinding
 import com.example.vexodns.network.ApiService
 import kotlinx.coroutines.launch
-import retrofit2.Response
+import com.google.gson.Gson
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
@@ -47,9 +47,22 @@ class HomeFragment : Fragment() {
         binding.fetchButton.setOnClickListener { fetchSubscriptionData() }
         return binding.root
     }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        loadLastData()
+    }
 
+    private fun loadLastData() {
+        val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE) ?: return
+        val lastDataJson = sharedPref.getString("last_sub_data", null)
+        if (lastDataJson != null) {
+            val gson = Gson()
+            val lastData = gson.fromJson(lastDataJson, SubscriptionData::class.java)
+            updateUi(lastData)
+        }
+    }
     private fun fetchSubscriptionData() {
-        val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+        val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE) ?: return
         var originalUrl = sharedPref?.getString("subscription_link", null)
 
         if (originalUrl.isNullOrBlank()) {
@@ -75,7 +88,12 @@ class HomeFragment : Fragment() {
                 }
                 val subData = subResponse.body()!!
                 updateUi(subData) // نمایش اولیه اطلاعات
-
+                val gson = Gson()
+                val subDataJson = gson.toJson(subData)
+                with(sharedPref.edit()) {
+                    putString("last_sub_data", subDataJson)
+                    apply()
+                }
                 // --- مرحله ۲: دریافت IP عمومی ---
                 val ipResponse = apiService.getPublicIp()
                 if (!ipResponse.isSuccessful || ipResponse.body() == null) {
@@ -94,7 +112,7 @@ class HomeFragment : Fragment() {
 
                         if (updateResponse.isSuccessful) {
                             // آپدیت UI با IP جدید
-                            binding.ipText.text = publicIp
+                            //binding.ipText.text = publicIp
                             updateStatusBar(getString(R.string.ip_changed_from_to, subData.lastIp ?: "N/A", publicIp), isError = false)
                             startCountdown()
                         } else {
@@ -161,7 +179,6 @@ class HomeFragment : Fragment() {
             // Formatting the number and adding " GB"
             "${DecimalFormat("#.##").format(remainingGb)} GB"
         }
-        binding.ipText.text = data.lastIp ?: "N/A"
         binding.statusBarText.text = getString(R.string.success_status)
     }
 

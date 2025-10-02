@@ -60,4 +60,5 @@
     <string name="menu_language">زبان</string>
     <string name="link_saved_success">لینک با موفقیت ذخیره شد</string>
     <string name="link_cannot_be_empty">لینک نمی‌تواند خالی باشد</string>
+    <string name="select_language_title">انتخاب زبان</string>
 </resources>

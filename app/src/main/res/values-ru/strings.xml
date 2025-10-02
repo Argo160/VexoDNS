@@ -4,10 +4,10 @@
     <string name="url_label">Введите полную ссылку на подписку:</string>
     <string name="fetch_button">Проверить информацию</string>
     <string name="fetch_button_loading">Проверка...</string>
-    <string name="username_header">Имя пользователя</string>
-    <string name="status_header">Статус подписки</string>
-    <string name="time_header">Оставшееся время</string>
-    <string name="volume_header">Оставшийся трафик</string>
+    <string name="username_header">Пользователь</string>
+    <string name="status_header">Статус</string>
+    <string name="time_header">Время</string>
+    <string name="volume_header">Трафик</string>
     <string name="ip_header">Зарегистрированный IP</string>
     <string name="doh_header">Ссылка DoH</string>
     <string name="dot_header">Адрес DoT</string>
@@ -60,4 +60,5 @@
     <string name="menu_language">Язык</string>
     <string name="link_saved_success">Ссылка успешно сохранена</string>
     <string name="link_cannot_be_empty">Ссылка не может быть пустой</string>
+    <string name="select_language_title">Выберите язык</string>
 </resources>

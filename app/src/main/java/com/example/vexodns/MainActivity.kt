@@ -2,6 +2,7 @@ package com.example.vexodns
 
 import android.os.Bundle
 import android.view.Menu
+import android.content.Context
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -12,7 +13,6 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.example.vexodns.databinding.ActivityMainBinding
-import android.content.Context
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -26,6 +26,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val sharedPref = getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+        val langCode = sharedPref.getString("app_language", null) // Get saved language
+        if (langCode != null) {
+            val localeList = LocaleListCompat.forLanguageTags(langCode)
+            // Set the locale before the activity is created
+            AppCompatDelegate.setApplicationLocales(localeList)
+        }
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -89,17 +96,50 @@ class MainActivity : AppCompatActivity() {
         val languages = arrayOf("English", "فارسی", "Русский", "中文")
         val languageCodes = arrayOf("en", "fa", "ru", "zh")
 
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Select Language")
-        builder.setItems(languages) { dialog, which ->
-            // `which` is the index of the selected item
-            val selectedLangCode = languageCodes[which]
-            setAppLocale(selectedLangCode)
+        // --- Step 1: Find the index of the currently selected language ---
+        val sharedPref = getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+        val currentLangCode = sharedPref.getString("app_language", "en") // Default to English "en"
+        var checkedItem = languageCodes.indexOf(currentLangCode)
+        if (checkedItem == -1) {
+            checkedItem = 0 // If saved language not found, default to the first one (English)
         }
+
+        // This will hold the language selected in the dialog
+        var selectedLangCode = languageCodes[checkedItem]
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(getString(R.string.select_language_title))
+
+        // --- Step 2: Use setSingleChoiceItems instead of setItems ---
+        builder.setSingleChoiceItems(languages, checkedItem) { dialog, which ->
+            // When a new item is clicked, just update our temporary variable
+            selectedLangCode = languageCodes[which]
+        }
+
+        // --- Step 3: Add OK and Cancel buttons ---
+        builder.setPositiveButton(android.R.string.ok) { dialog, which ->
+            // When OK is clicked, apply the selected language if it's different
+            if (selectedLangCode != currentLangCode) {
+                setAppLocale(selectedLangCode)
+            }
+            dialog.dismiss()
+        }
+        builder.setNegativeButton(android.R.string.cancel) { dialog, which ->
+            dialog.dismiss()
+        }
+
         builder.create().show()
     }
 
     private fun setAppLocale(languageCode: String) {
+        // 1. Save the selected language code
+        val sharedPref = getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putString("app_language", languageCode)
+            apply()
+        }
+
+        // 2. Apply the new locale (this part is the same as before)
         val localeList = LocaleListCompat.forLanguageTags(languageCode)
         AppCompatDelegate.setApplicationLocales(localeList)
     }
