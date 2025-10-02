@@ -17,6 +17,8 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.navigation.ui.NavigationUI
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 
 class MainActivity : AppCompatActivity() {
 
@@ -38,11 +40,11 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow
+                R.id.nav_home
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
-//navView.setupWithNavController(navController)
+        //navView.setupWithNavController(navController)
         navView.setNavigationItemSelectedListener { menuItem ->
             // Close the navigation drawer
             binding.drawerLayout.closeDrawers()
@@ -52,6 +54,10 @@ class MainActivity : AppCompatActivity() {
                     // Show our custom dialog
                     showAddLinkDialog()
                     true // Mark as handled
+                }
+                R.id.nav_language -> {
+                    showLanguageSelectionDialog()
+                    true // یعنی کلیک مدیریت شد
                 }
                 else -> {
                     // Let the Navigation Component handle other items
@@ -71,11 +77,36 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
+    private fun showLanguageSelectionDialog() {
+        val languages = arrayOf("English", "فارسی", "Русский", "中文")
+        val languageCodes = arrayOf("en", "fa", "ru", "zh")
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Select Language")
+        builder.setItems(languages) { dialog, which ->
+            // `which` is the index of the selected item
+            val selectedLangCode = languageCodes[which]
+            setAppLocale(selectedLangCode)
+        }
+        builder.create().show()
+    }
+
+    private fun setAppLocale(languageCode: String) {
+        val localeList = LocaleListCompat.forLanguageTags(languageCode)
+        AppCompatDelegate.setApplicationLocales(localeList)
+    }
     private fun showAddLinkDialog() {
         // Inflate the custom layout
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_link, null)
         val editTextLink = dialogView.findViewById<EditText>(R.id.edit_text_link)
+        // Read the saved link from SharedPreferences
+        val sharedPref = getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+        val savedLink = sharedPref.getString("subscription_link", null)
 
+        // Set the saved link into the EditText if it exists
+        if (!savedLink.isNullOrBlank()) {
+            editTextLink.setText(savedLink)
+        }
         // Build the dialog
         val builder = AlertDialog.Builder(this)
         builder.setView(dialogView)

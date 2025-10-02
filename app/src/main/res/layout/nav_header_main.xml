@@ -16,7 +16,7 @@
         android:id="@+id/imageView"
         android:layout_width="68dp"
         android:layout_height="87dp"
-        android:contentDescription="@string/nav_header_desc"
+        android:contentDescription="@string/app_name"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
         app:srcCompat="@drawable/logo" />
 

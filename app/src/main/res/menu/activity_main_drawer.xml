@@ -8,5 +8,8 @@
             android:id="@+id/nav_sub"
             android:icon="@drawable/link_24px"
             android:title="Subscription" />
+        <item
+            android:id="@+id/nav_language"
+            android:icon="@drawable/language_24px" android:title="Language" />
     </group>
 </menu>
