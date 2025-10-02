@@ -55,8 +55,9 @@
     <string name="dns_unset_fail_message">بازنشانی تنظیمات DNS برای اتصال‌های شبکه فعال ناموفق بود.</string>
     <string name="connect_dns_tooltip">DNS امن پیشنهادی را روی اتصال‌های شبکه فعال شما تنظیم می‌کند.</string>
     <string name="unset_dns_tooltip">تنظیمات DNS را روی اتصال‌های شبکه شما به حالت خودکار (DHCP) بازنشانی می‌کند.</string>
-
+    <string name="timer_text_title">لطفاً برای آپدیت شدن IP در سرور صبر کنید</string>
     <string name="menu_subscription">اشتراک</string>
     <string name="menu_language">زبان</string>
-
+    <string name="link_saved_success">لینک با موفقیت ذخیره شد</string>
+    <string name="link_cannot_be_empty">لینک نمی‌تواند خالی باشد</string>
 </resources>

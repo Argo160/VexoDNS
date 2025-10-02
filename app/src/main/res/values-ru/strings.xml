@@ -55,8 +55,9 @@
     <string name="dns_unset_fail_message">Не удалось сбросить настройки DNS для активных сетевых интерфейсов.</string>
     <string name="connect_dns_tooltip">Устанавливает рекомендуемый безопасный DNS на ваших активных сетевых адаптерах.</string>
     <string name="unset_dns_tooltip">Сбрасывает настройки DNS на ваших сетевых адаптерах до автоматических (DHCP).</string>
-
+    <string name="timer_text_title">Пожалуйста, подождите, пока IP обновится на сервере</string>
     <string name="menu_subscription">Подписка</string>
     <string name="menu_language">Язык</string>
-
+    <string name="link_saved_success">Ссылка успешно сохранена</string>
+    <string name="link_cannot_be_empty">Ссылка не может быть пустой</string>
 </resources>

@@ -55,8 +55,9 @@
     <string name="dns_unset_fail_message">Failed to reset DNS settings for active network interfaces.</string>
     <string name="connect_dns_tooltip">Sets the recommended secure DNS on your active network adapters.</string>
     <string name="unset_dns_tooltip">Resets DNS settings on your network adapters back to automatic (DHCP).</string>
-
+    <string name="timer_text_title">Please wait for server to update IP</string>
     <string name="menu_subscription">Subscription</string>
     <string name="menu_language">Language</string>
-
+    <string name="link_saved_success">Link saved successfully</string>
+    <string name="link_cannot_be_empty">Link cannot be empty</string>
 </resources>

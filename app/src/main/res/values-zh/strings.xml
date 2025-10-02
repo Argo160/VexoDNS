@@ -55,8 +55,9 @@
     <string name="dns_unset_fail_message">重置活动网络接口的DNS设置失败。</string>
     <string name="connect_dns_tooltip">在您的活动网络适配器上设置推荐的安全DNS。</string>
     <string name="unset_dns_tooltip">将您的网络适配器上的DNS设置重置为自动 (DHCP)。</string>
-
+    <string name="timer_text_title">请稍候，等待服务器更新IP</string>
     <string name="menu_subscription">订阅</string>
     <string name="menu_language">语言</string>
-
+    <string name="link_saved_success">链接已成功保存</string>
+    <string name="link_cannot_be_empty">链接不能为空</string>
 </resources>

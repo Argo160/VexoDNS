@@ -7,9 +7,10 @@
         <item
             android:id="@+id/nav_sub"
             android:icon="@drawable/link_24px"
-            android:title="Subscription" />
+            android:title="@string/menu_subscription" />
         <item
             android:id="@+id/nav_language"
-            android:icon="@drawable/language_24px" android:title="Language" />
+            android:icon="@drawable/language_24px"
+            android:title="@string/menu_language" />
     </group>
 </menu>

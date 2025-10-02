@@ -66,7 +66,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
+    // Add this function inside MainActivity class
+    fun setDrawerEnabled(enabled: Boolean) {
+        val lockMode = if (enabled) {
+            androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED
+        } else {
+            androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED
+        }
+        binding.drawerLayout.setDrawerLockMode(lockMode)
+    }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main_toolbar_menu, menu)
@@ -110,9 +118,9 @@ class MainActivity : AppCompatActivity() {
         // Build the dialog
         val builder = AlertDialog.Builder(this)
         builder.setView(dialogView)
-        builder.setTitle("افزودن لینک اشتراک")
-        builder.setPositiveButton("اوکی") { _, _ ->
-            val link = editTextLink.text.toString()
+        builder.setTitle(R.string.url_label)
+        builder.setPositiveButton(android.R.string.ok) { _, _ ->
+        val link = editTextLink.text.toString()
             if (link.isNotBlank()) {
                 // Save the link using SharedPreferences
                 val sharedPref = getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
@@ -120,12 +128,12 @@ class MainActivity : AppCompatActivity() {
                     putString("subscription_link", link)
                     apply()
                 }
-                Toast.makeText(this, "لینک ذخیره شد", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.link_saved_success), Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "لینک نمی‌تواند خالی باشد", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.link_cannot_be_empty), Toast.LENGTH_SHORT).show()
             }
         }
-        builder.setNegativeButton("لغو") { dialog, _ ->
+        builder.setNegativeButton(android.R.string.cancel) { dialog, _ ->
             dialog.cancel()
         }
 
