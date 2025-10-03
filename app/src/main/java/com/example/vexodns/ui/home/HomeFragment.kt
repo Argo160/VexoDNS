@@ -24,20 +24,38 @@ import java.text.DecimalFormat
 import android.os.CountDownTimer
 import android.widget.AdapterView
 import com.example.vexodns.MainActivity
-
+import android.app.Activity
+import androidx.activity.result.contract.ActivityResultContracts
+import android.content.Intent
+import android.net.VpnService
+import com.example.vexodns.service.DnsVpnService
+import androidx.core.content.edit
+import com.google.gson.GsonBuilder
 class HomeFragment : Fragment() {
     private var isConnected = false
-
+    // Add these to the top of the HomeFragment class
+    private var lastSubscriptionData: SubscriptionData? = null
+    private val vpnPermissionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            startVpnService()
+        } else {
+            Toast.makeText(requireContext(), "Permission for VPN was denied", Toast.LENGTH_SHORT).show()
+        }
+    }
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
     // یک نمونه از ApiService برای استفاده در کل کلاس
     private val apiService: ApiService by lazy {
+        // Create a lenient Gson instance
+        val gson = GsonBuilder()
+            .setLenient()
+            .create()
+
         Retrofit.Builder()
-            .baseUrl("https://example.com/") // Placeholder
-            // ScalarsConverterFactory برای خواندن پاسخ‌های متنی ساده مثل IP لازم است
+            .baseUrl("https://example.com/")
+            .addConverterFactory(GsonConverterFactory.create(gson)) // Use the new lenient Gson
             .addConverterFactory(ScalarsConverterFactory.create())
-            .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(ApiService::class.java)
     }
@@ -51,9 +69,14 @@ class HomeFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loadLastData() // This line is already there
+        loadLastData() // برای بارگذاری اطلاعات اشتراک
 
-        // --- ADD THE SPINNER LOGIC HERE ---
+        // --- اضافه شده: خواندن وضعیت اتصال از حافظه ---
+        val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+        isConnected = sharedPref?.getBoolean("is_connected_state", false) ?: false
+        // -----------------------------------------
+
+        // منطق اسپینر (بدون تغییر)
         binding.dnsTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedDnsType = parent?.getItemAtPosition(position).toString()
@@ -65,20 +88,63 @@ class HomeFragment : Fragment() {
                 // This is usually not needed
             }
         }
+
+        // منطق دکمه اتصال (تغییر کرده)
         binding.connectButtonLayout.setOnClickListener {
-            isConnected = !isConnected // Toggle the state
-            updateButtonState()
+            isConnected = !isConnected // تغییر وضعیت
+
+            // --- اضافه شده: ذخیره وضعیت جدید در حافظه ---
+            sharedPref?.edit {
+                putBoolean("is_connected_state", isConnected)
+            }
+            // -----------------------------------------
+
+            updateButtonState() // آپدیت ظاهر دکمه
         }
+
+        // آپدیت اولیه ظاهر دکمه بر اساس وضعیت خوانده شده از حافظه
         updateButtonState()
     }
     private fun updateButtonState() {
         if (isConnected) {
             binding.connectButtonLayout.setBackgroundResource(R.drawable.button_background_connected)
             binding.connectStatusText.text = getString(R.string.status_connected)
+            startVpnService()
         } else {
             binding.connectButtonLayout.setBackgroundResource(R.drawable.button_background_disconnected)
             binding.connectStatusText.text = getString(R.string.status_not_connected)
+            stopVpnService()
         }
+    }
+    private fun startVpnService() {
+        val dnsIp = lastSubscriptionData?.douIp1 // From your Python code logic
+        if (dnsIp == null) {
+            Toast.makeText(requireContext(), "DNS IP not available from subscription", Toast.LENGTH_SHORT).show()
+            // Reset button state if IP is not available
+            isConnected = false
+            binding.connectButtonLayout.setBackgroundResource(R.drawable.button_background_disconnected)
+            binding.connectStatusText.text = getString(R.string.status_not_connected)
+            return
+        }
+
+        val vpnIntent = VpnService.prepare(requireContext())
+        if (vpnIntent != null) {
+            vpnPermissionLauncher.launch(vpnIntent)
+        } else {
+            // Permission already granted, start the service
+            val intent = Intent(requireContext(), DnsVpnService::class.java).apply {
+                action = DnsVpnService.ACTION_CONNECT
+                putExtra("DNS_IP", dnsIp)
+            }
+            requireActivity().startService(intent)
+        }
+    }
+
+    private fun stopVpnService() {
+        val intent = Intent(requireContext(), DnsVpnService::class.java).apply {
+            action = DnsVpnService.ACTION_DISCONNECT
+        }
+        requireActivity().startService(intent)
     }
     private fun loadLastData() {
         val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE) ?: return
@@ -171,6 +237,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateUi(data: SubscriptionData) {
+        lastSubscriptionData = data
         binding.resultCard.isVisible = true
         binding.usernameText.text = data.username
         val statusChip = binding.statusChip

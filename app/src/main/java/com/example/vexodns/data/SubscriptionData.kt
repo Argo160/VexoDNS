@@ -18,6 +18,8 @@ data class SubscriptionData(
     val allowedVolumeGb: Double?,
     @SerializedName("used_volume_gb")
     val usedVolumeGb: Double?,
+    @SerializedName("dou_ip1")
+    val douIp1: String?,
     @SerializedName("last_ip")
     val lastIp: String?
 )

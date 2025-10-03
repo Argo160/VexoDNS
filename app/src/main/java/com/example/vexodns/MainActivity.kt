@@ -1,5 +1,6 @@
 package com.example.vexodns
 
+import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import com.google.android.material.navigation.NavigationView
@@ -16,6 +17,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.navigation.ui.NavigationUI
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import android.os.Build
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val sharedPref = getSharedPreferences("VexoDNSPrefs", MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
         val langCode = sharedPref.getString("app_language", null) // Get saved language
         if (langCode != null) {
             val localeList = LocaleListCompat.forLanguageTags(langCode)
@@ -67,6 +72,16 @@ class MainActivity : AppCompatActivity() {
                     // Let the Navigation Component handle other items
                     NavigationUI.onNavDestinationSelected(menuItem, navController)
                 }
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val permission = android.Manifest.permission.POST_NOTIFICATIONS
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    permission
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(this, arrayOf(permission), 0)
             }
         }
     }
