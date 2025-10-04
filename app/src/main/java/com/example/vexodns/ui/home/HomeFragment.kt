@@ -31,8 +31,15 @@ import android.net.VpnService
 import com.example.vexodns.service.DnsVpnService
 import androidx.core.content.edit
 import com.google.gson.GsonBuilder
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
+import android.os.Build
+
+
 class HomeFragment : Fragment() {
+    private lateinit var vpnStateReceiver: BroadcastReceiver
     private var isConnected = false
+    private var selectedDnsType: String = "Do53"
     // Add these to the top of the HomeFragment class
     private var lastSubscriptionData: SubscriptionData? = null
     private val vpnPermissionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -59,51 +66,107 @@ class HomeFragment : Fragment() {
             .build()
             .create(ApiService::class.java)
     }
-
+    private fun resetConnectionState() {
+        val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+        isConnected = false
+        sharedPref?.edit { putBoolean("is_connected_state", false) }
+        updateButtonState()
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        binding.fetchButton.setOnClickListener { fetchSubscriptionData() }
+        binding.fetchButton.setOnClickListener {
+            lifecycleScope.launch {
+                fetchSubscriptionData(showErrors = true)
+            }
+        }
         return binding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loadLastData() // برای بارگذاری اطلاعات اشتراک
+        loadLastData()
 
-        // --- اضافه شده: خواندن وضعیت اتصال از حافظه ---
         val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
         isConnected = sharedPref?.getBoolean("is_connected_state", false) ?: false
-        // -----------------------------------------
 
-        // منطق اسپینر (بدون تغییر)
+        updateButtonState()
+
+        // --- New Fetch Button Logic ---
+        binding.fetchButton.setOnClickListener {
+            lifecycleScope.launch {
+                fetchSubscriptionData(showErrors = true)
+            }
+        }
+
+        // --- New Connect Button Logic ---
+        binding.connectButtonLayout.setOnClickListener {
+            // First, check if the right DNS type is selected
+            if (selectedDnsType != "Do53") {
+                Toast.makeText(requireContext(), "این قابلیت هنوز پیاده‌سازی نشده است", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Toggle connection state
+            isConnected = !isConnected
+            sharedPref?.edit { putBoolean("is_connected_state", isConnected) }
+
+            // If user wants to connect, start the check process
+            if (isConnected) {
+                binding.connectStatusText.text = getString(R.string.fetch_button_loading)
+
+                lifecycleScope.launch {
+                    val result = fetchSubscriptionData(showErrors = true)
+
+                    // Now check the result before connecting
+                    if (result.wasSuccessful && result.subscriptionData != null) {
+                        if (result.subscriptionData.statusKey != "table_status_active") {
+                            Toast.makeText(requireContext(), "اشتراک شما فعال نیست", Toast.LENGTH_LONG).show()
+                            resetConnectionState() // Revert the button
+                        } else if (result.needsCountdown) {
+                            startCountdown()
+                            Toast.makeText(requireContext(), "IP در حال آپدیت است، پس از اتمام تایمر دوباره تلاش کنید", Toast.LENGTH_LONG).show()
+                            resetConnectionState() // Revert the button
+                        } else {
+                            // Everything is OK, proceed with connection
+                            updateButtonState()
+                        }
+                    } else {
+                        // Fetch failed, revert the button
+                        resetConnectionState()
+                    }
+                }
+            } else {
+                // If user wants to disconnect, just do it
+                updateButtonState()
+            }
+        }
+        vpnStateReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.action == DnsVpnService.BROADCAST_VPN_STATE) {
+                    // The service has stopped, so update the UI
+                    if (isConnected) {
+                        binding.connectButtonLayout.performClick()
+                    }
+                }
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requireActivity().registerReceiver(vpnStateReceiver, IntentFilter(DnsVpnService.BROADCAST_VPN_STATE), Context.RECEIVER_NOT_EXPORTED)
+        } else       {
+              requireActivity().registerReceiver(vpnStateReceiver, IntentFilter(DnsVpnService.BROADCAST_VPN_STATE))
+        }
         binding.dnsTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedDnsType = parent?.getItemAtPosition(position).toString()
-                // For now, we just show a Toast message to confirm it's working
+                // اینجا می‌توانید منطق خود را اضافه کنید، فعلاً یک پیام Toast نمایش می‌دهیم
                 Toast.makeText(requireContext(), "Selected: $selectedDnsType", Toast.LENGTH_SHORT).show()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
-                // This is usually not needed
+                // این تابع الزامی است، اما می‌توانیم آن را خالی بگذاریم.
             }
         }
-
-        // منطق دکمه اتصال (تغییر کرده)
-        binding.connectButtonLayout.setOnClickListener {
-            isConnected = !isConnected // تغییر وضعیت
-
-            // --- اضافه شده: ذخیره وضعیت جدید در حافظه ---
-            sharedPref?.edit {
-                putBoolean("is_connected_state", isConnected)
-            }
-            // -----------------------------------------
-
-            updateButtonState() // آپدیت ظاهر دکمه
-        }
-
-        // آپدیت اولیه ظاهر دکمه بر اساس وضعیت خوانده شده از حافظه
-        updateButtonState()
     }
     private fun updateButtonState() {
         if (isConnected) {
@@ -155,78 +218,79 @@ class HomeFragment : Fragment() {
             updateUi(lastData)
         }
     }
-    private fun fetchSubscriptionData() {
-        val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE) ?: return
+    // A new data class to hold the result of our fetch operation
+    private data class FetchResult(
+        val wasSuccessful: Boolean,
+        val needsCountdown: Boolean,
+        val subscriptionData: SubscriptionData?
+    )
+
+    private suspend fun fetchSubscriptionData(showErrors: Boolean = true): FetchResult {
+        val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE) ?: return FetchResult(false, false, null)
         val originalUrl = sharedPref.getString("subscription_link", null)
 
         if (originalUrl.isNullOrBlank()) {
-            Toast.makeText(context, getString(R.string.warning_text), Toast.LENGTH_LONG).show()
-            return
+            if (showErrors) Toast.makeText(context, getString(R.string.warning_text), Toast.LENGTH_LONG).show()
+            return FetchResult(false, false, null)
         }
 
-        binding.progressBar.isVisible = true
-        binding.resultCard.isVisible = false
-        binding.statusBarText.text = getString(R.string.connecting_status)
+        requireActivity().runOnUiThread {
+            binding.progressBar.isVisible = true
+            binding.resultCard.isVisible = false
+            binding.statusBarText.text = getString(R.string.connecting_status)
+        }
 
-        lifecycleScope.launch {
-            try {
-                // --- مرحله ۱: دریافت اطلاعات اشتراک ---
-                var subApiUrl = originalUrl
-                if ("/sub/" in originalUrl && "/api/sub/" !in originalUrl) {
-                    subApiUrl = originalUrl.replace("/sub/", "/api/sub/")
-                }
-                val subResponse = apiService.getSubscriptionData(subApiUrl)
-                if (!subResponse.isSuccessful || subResponse.body() == null) {
-                    handleError(getString(R.string.error_connect))
-                    return@launch
-                }
-                val subData = subResponse.body()!!
-                updateUi(subData) // نمایش اولیه اطلاعات
-                val gson = Gson()
-                val subDataJson = gson.toJson(subData)
-                with(sharedPref.edit()) {
-                    putString("last_sub_data", subDataJson)
-                    apply()
-                }
-                // --- مرحله ۲: دریافت IP عمومی ---
-                val ipResponse = apiService.getPublicIp()
-                if (!ipResponse.isSuccessful || ipResponse.body() == null) {
-                    updateStatusBar(getString(R.string.ip_not_found), isError = true)
-                    return@launch
-                }
-                val publicIp = ipResponse.body()!!
-
-                // --- مرحله ۳: مقایسه و آپدیت IP ---
-                if (publicIp != subData.lastIp) {
-                    val token = originalUrl.split("/sub/").lastOrNull()
-                    if (token != null) {
-                        val updateIpUrl = subApiUrl.split("/api/sub/")[0] + "/api/update_ip"
-                        val updateRequest = UpdateIpRequest(token = token, ip = publicIp)
-                        val updateResponse = apiService.updateIp(updateIpUrl, updateRequest)
-
-                        if (updateResponse.isSuccessful) {
-                            // آپدیت UI با IP جدید
-                            //binding.ipText.text = publicIp
-                            updateStatusBar(getString(R.string.ip_changed_from_to, subData.lastIp ?: "N/A", publicIp), isError = false)
-                            startCountdown()
-                        } else {
-                            // مدیریت خطاهایی مثل IP Conflict
-                            if (updateResponse.code() == 409) {
-                                updateStatusBar(getString(R.string.ip_conflict_error), isError = true)
-                            } else {
-                                updateStatusBar(getString(R.string.ip_update_fail), isError = true)
-                            }
-                        }
-                    }
-                } else {
-                    updateStatusBar(getString(R.string.ip_no_change, publicIp), isError = false)
-                }
-
-            } catch (e: Exception) {
-                handleError("خطا: ${e.message}")
-            } finally {
-                binding.progressBar.isVisible = false
+        try {
+            var subApiUrl = originalUrl
+            if ("/sub/" in originalUrl && "/api/sub/" !in originalUrl) {
+                subApiUrl = originalUrl.replace("/sub/", "/api/sub/")
             }
+            val subResponse = apiService.getSubscriptionData(subApiUrl)
+            if (!subResponse.isSuccessful || subResponse.body() == null) {
+                if (showErrors) handleError(getString(R.string.error_connect))
+                return FetchResult(false, false, null)
+            }
+            val subData = subResponse.body()!!
+
+            requireActivity().runOnUiThread { updateUi(subData) }
+
+            val gson = Gson()
+            val subDataJson = gson.toJson(subData)
+            sharedPref.edit { putString("last_sub_data", subDataJson) }
+
+            val ipResponse = apiService.getPublicIp()
+            if (!ipResponse.isSuccessful || ipResponse.body() == null) {
+                if (showErrors) updateStatusBar(getString(R.string.ip_not_found), isError = true)
+                return FetchResult(true, false, subData) // Data fetch was successful, but IP check failed
+            }
+            val publicIp = ipResponse.body()!!
+
+            if (publicIp != subData.lastIp) {
+                val token = originalUrl.split("/sub/").lastOrNull()
+                if (token != null) {
+                    val updateIpUrl = subApiUrl.split("/api/sub/")[0] + "/api/update_ip"
+                    val updateRequest = UpdateIpRequest(token = token, ip = publicIp)
+                    val updateResponse = apiService.updateIp(updateIpUrl, updateRequest)
+
+                    if (updateResponse.isSuccessful) {
+                        updateStatusBar(getString(R.string.ip_changed_from_to, subData.lastIp ?: "N/A", publicIp), isError = false)
+                        return FetchResult(true, true, subData) // Needs countdown
+                    } else {
+                        val errorKey = if (updateResponse.code() == 409) R.string.ip_conflict_error else R.string.ip_update_fail
+                        if (showErrors) updateStatusBar(getString(errorKey), isError = true)
+                        return FetchResult(true, false, subData)
+                    }
+                }
+            } else {
+                updateStatusBar(getString(R.string.ip_no_change, publicIp), isError = false)
+            }
+            return FetchResult(true, false, subData) // Everything successful, no countdown needed
+
+        } catch (e: Exception) {
+            if (showErrors) handleError("خطا: ${e.message}")
+            return FetchResult(false, false, null)
+        } finally {
+            requireActivity().runOnUiThread { binding.progressBar.isVisible = false }
         }
     }
 
@@ -285,6 +349,7 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        requireActivity().unregisterReceiver(vpnStateReceiver)
         _binding = null
     }
     private fun startCountdown() {
@@ -309,6 +374,19 @@ class HomeFragment : Fragment() {
                 // دکمه و منو را دوباره فعال می‌کنیم
                 binding.fetchButton.isEnabled = true
                 (activity as? MainActivity)?.setDrawerEnabled(true)
+
+                // --- START: NEW CODE ADDED HERE ---
+                // به صورت خودکار فرآیند اتصال را دوباره شروع می‌کنیم
+                Toast.makeText(requireContext(), "زمان انتظار به پایان رسید، در حال اتصال...", Toast.LENGTH_SHORT).show()
+
+                // وضعیت را به "متصل" تغییر داده و ذخیره می‌کنیم
+                isConnected = true
+                val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+                sharedPref?.edit { putBoolean("is_connected_state", isConnected) }
+
+                // تابع آپدیت دکمه را فراخوانی می‌کنیم تا اتصال برقرار شود
+                updateButtonState()
+                // --- END: NEW CODE ADDED HERE ---
             }
         }.start()
     }

@@ -63,4 +63,5 @@
     <string name="select_language_title">انتخاب زبان</string>
     <string name="status_connected">متصل</string>
     <string name="status_not_connected">غیرمتصل</string>
+    <string name="action_stop">توقف</string>
 </resources>

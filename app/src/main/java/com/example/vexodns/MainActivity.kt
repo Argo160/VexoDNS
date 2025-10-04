@@ -28,13 +28,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val sharedPref = getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
-        val langCode = sharedPref.getString("app_language", null) // Get saved language
+        val sharedPref = getSharedPreferences("VexoDNSPrefs", MODE_PRIVATE)
+
+        // *** کد ریست کردن حذف شد! ***
+        // دیگر is_connected_state را به false تنظیم نمی‌کنیم
+
+        // زبان ذخیره شده را می‌خوانیم و تنظیم می‌کنیم
+        val langCode = sharedPref.getString("app_language", null)
         if (langCode != null) {
             val localeList = LocaleListCompat.forLanguageTags(langCode)
-            // Set the locale before the activity is created
             AppCompatDelegate.setApplicationLocales(localeList)
         }
+
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -42,50 +47,38 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.appBarMain.toolbar)
         supportActionBar?.title = ""
+
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.nav_home
-            ), drawerLayout
+            setOf(R.id.nav_home), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
-        //navView.setupWithNavController(navController)
         navView.setNavigationItemSelectedListener { menuItem ->
-            // Close the navigation drawer
             binding.drawerLayout.closeDrawers()
-
             when (menuItem.itemId) {
-                R.id.nav_sub -> { // <-- Use the ID of your subscription item
-                    // Show our custom dialog
+                R.id.nav_sub -> {
                     showAddLinkDialog()
-                    true // Mark as handled
+                    true
                 }
                 R.id.nav_language -> {
                     showLanguageSelectionDialog()
-                    true // یعنی کلیک مدیریت شد
+                    true
                 }
-                else -> {
-                    // Let the Navigation Component handle other items
-                    NavigationUI.onNavDestinationSelected(menuItem, navController)
-                }
+                else -> NavigationUI.onNavDestinationSelected(menuItem, navController)
             }
         }
+
+        // درخواست دسترسی نوتیفیکیشن
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val permission = android.Manifest.permission.POST_NOTIFICATIONS
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    permission
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, arrayOf(permission), 0)
             }
         }
     }
-    // Add this function inside MainActivity class
+
     fun setDrawerEnabled(enabled: Boolean) {
         val lockMode = if (enabled) {
             DrawerLayout.LOCK_MODE_UNLOCKED
@@ -94,8 +87,8 @@ class MainActivity : AppCompatActivity() {
         }
         binding.drawerLayout.setDrawerLockMode(lockMode)
     }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main_toolbar_menu, menu)
         return true
     }
@@ -104,33 +97,28 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
+
     private fun showLanguageSelectionDialog() {
         val languages = arrayOf("English", "فارسی", "Русский", "中文")
         val languageCodes = arrayOf("en", "fa", "ru", "zh")
 
-        // --- Step 1: Find the index of the currently selected language ---
         val sharedPref = getSharedPreferences("VexoDNSPrefs", MODE_PRIVATE)
-        val currentLangCode = sharedPref.getString("app_language", "en") // Default to English "en"
+        val currentLangCode = sharedPref.getString("app_language", "en")
         var checkedItem = languageCodes.indexOf(currentLangCode)
         if (checkedItem == -1) {
-            checkedItem = 0 // If saved language not found, default to the first one (English)
+            checkedItem = 0
         }
 
-        // This will hold the language selected in the dialog
         var selectedLangCode = languageCodes[checkedItem]
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.select_language_title))
 
-        // --- Step 2: Use setSingleChoiceItems instead of setItems ---
         builder.setSingleChoiceItems(languages, checkedItem) { dialog, which ->
-            // When a new item is clicked, just update our temporary variable
             selectedLangCode = languageCodes[which]
         }
 
-        // --- Step 3: Add OK and Cancel buttons ---
         builder.setPositiveButton(android.R.string.ok) { dialog, which ->
-            // When OK is clicked, apply the selected language if it's different
             if (selectedLangCode != currentLangCode) {
                 setAppLocale(selectedLangCode)
             }
@@ -144,37 +132,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setAppLocale(languageCode: String) {
-        // 1. Save the selected language code
         val sharedPref = getSharedPreferences("VexoDNSPrefs", MODE_PRIVATE)
         with(sharedPref.edit()) {
             putString("app_language", languageCode)
             apply()
         }
 
-        // 2. Apply the new locale (this part is the same as before)
         val localeList = LocaleListCompat.forLanguageTags(languageCode)
         AppCompatDelegate.setApplicationLocales(localeList)
     }
+
     private fun showAddLinkDialog() {
-        // Inflate the custom layout
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_link, null)
         val editTextLink = dialogView.findViewById<EditText>(R.id.edit_text_link)
-        // Read the saved link from SharedPreferences
+
         val sharedPref = getSharedPreferences("VexoDNSPrefs", MODE_PRIVATE)
         val savedLink = sharedPref.getString("subscription_link", null)
 
-        // Set the saved link into the EditText if it exists
         if (!savedLink.isNullOrBlank()) {
             editTextLink.setText(savedLink)
         }
-        // Build the dialog
+
         val builder = AlertDialog.Builder(this)
         builder.setView(dialogView)
         builder.setTitle(R.string.url_label)
         builder.setPositiveButton(android.R.string.ok) { _, _ ->
-        val link = editTextLink.text.toString()
+            val link = editTextLink.text.toString()
             if (link.isNotBlank()) {
-                // Save the link using SharedPreferences
                 val sharedPref = getSharedPreferences("VexoDNSPrefs", MODE_PRIVATE)
                 with(sharedPref.edit()) {
                     putString("subscription_link", link)
@@ -189,7 +173,6 @@ class MainActivity : AppCompatActivity() {
             dialog.cancel()
         }
 
-        // Show the dialog
         builder.create().show()
     }
 }

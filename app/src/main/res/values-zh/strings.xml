@@ -63,4 +63,5 @@
     <string name="select_language_title">选择语言</string>
     <string name="status_connected">已连接</string>
     <string name="status_not_connected">未连接</string>
+    <string name="action_stop">停止</string>
 </resources>

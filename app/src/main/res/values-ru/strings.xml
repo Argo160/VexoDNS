@@ -63,4 +63,5 @@
     <string name="select_language_title">Выберите язык</string>
     <string name="status_connected">Подключено</string>
     <string name="status_not_connected">Не подключено</string>
+    <string name="action_stop">Стоп</string>
 </resources>
