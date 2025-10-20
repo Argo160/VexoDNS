@@ -154,6 +154,7 @@ class HomeFragment : Fragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requireActivity().registerReceiver(vpnStateReceiver, IntentFilter(DnsVpnService.BROADCAST_VPN_STATE), Context.RECEIVER_NOT_EXPORTED)
         } else       {
+            @Suppress("UnspecifiedRegisterReceiverFlag")
               requireActivity().registerReceiver(vpnStateReceiver, IntentFilter(DnsVpnService.BROADCAST_VPN_STATE))
         }
         binding.dnsTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -258,12 +259,39 @@ class HomeFragment : Fragment() {
             val subDataJson = gson.toJson(subData)
             sharedPref.edit { putString("last_sub_data", subDataJson) }
 
-            val ipResponse = apiService.getPublicIp()
-            if (!ipResponse.isSuccessful || ipResponse.body() == null) {
+            val publicIp: String? = try {
+                // تلاش برای سرویس اول
+                val response1 = apiService.getPublicIp("https://icanhazip.com")
+                if (response1.isSuccessful && !response1.body().isNullOrBlank()) {
+                    response1.body()!!.trim()
+                } else {
+                    // در صورت عدم موفقیت، تلاش برای سرویس دوم
+                    val response2 = apiService.getPublicIp("https://v4.ident.me")
+                    if (response2.isSuccessful && !response2.body().isNullOrBlank()) {
+                        response2.body()!!.trim()
+                    } else {
+                        null
+                    }
+                }
+            } catch (e: Exception) {
+                // اگر سرویس اول با خطا مواجه شد (مثلا قطعی شبکه)، سرویس دوم را امتحان کن
+                try {
+                    val response2 = apiService.getPublicIp("https://v4.ident.me")
+                    if (response2.isSuccessful && !response2.body().isNullOrBlank()) {
+                        response2.body()!!.trim()
+                    } else {
+                        null
+                    }
+                } catch (e2: Exception) {
+                    null // هر دو سرویس شکست خوردند
+                }
+            }
+
+            // بررسی نهایی
+            if (publicIp == null) {
                 if (showErrors) updateStatusBar(getString(R.string.ip_not_found), isError = true)
                 return FetchResult(true, false, subData) // Data fetch was successful, but IP check failed
             }
-            val publicIp = ipResponse.body()!!
 
             if (publicIp != subData.lastIp) {
                 val token = originalUrl.split("/sub/").lastOrNull()

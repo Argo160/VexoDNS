@@ -15,8 +15,8 @@ interface ApiService {
     suspend fun getSubscriptionData(@Url url: String): Response<SubscriptionData>
 
     // برای گرفتن IP عمومی کاربر
-    @GET("https://api.ipify.org")
-    suspend fun getPublicIp(): Response<String>
+    @GET
+    suspend fun getPublicIp(@Url url: String): Response<String>
 
     // برای ارسال آپدیت IP
     @POST
