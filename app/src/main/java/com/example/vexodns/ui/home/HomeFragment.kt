@@ -99,11 +99,18 @@ class HomeFragment : Fragment() {
         // --- New Fetch Button Logic ---
         binding.fetchButton.setOnClickListener {
             lifecycleScope.launch {
-                fetchSubscriptionData(showErrors = true)
+                // نتیجه تابع را ذخیره می‌کنیم
+                val result = fetchSubscriptionData(showErrors = true)
+
+                // بررسی می‌کنیم که آیا تابع اعلام کرده که آی‌پی عوض شده و نیاز به تایمر است
+                if (result.needsCountdown) {
+                    // تایمر را شروع می‌کنیم
+                    startCountdown(shouldConnectOnFinish = false)
+                }
             }
         }
 
-// --- New Connect Button Logic ---
+        // --- New Connect Button Logic ---
         binding.connectButtonLayout.setOnClickListener {
             // First, check if the right DNS type is selected
             if (selectedDnsType != "Do53") {
@@ -128,7 +135,7 @@ class HomeFragment : Fragment() {
                             Toast.makeText(requireContext(), "اشتراک شما فعال نیست", Toast.LENGTH_LONG).show()
                             resetConnectionState() // Revert the button
                         } else if (result.needsCountdown) {
-                            startCountdown()
+                            startCountdown(shouldConnectOnFinish = true)
 
                         } else {
                             // Everything is OK, proceed with connection
@@ -383,7 +390,7 @@ class HomeFragment : Fragment() {
         requireActivity().unregisterReceiver(vpnStateReceiver)
         _binding = null
     }
-    private fun startCountdown() {
+    private fun startCountdown(shouldConnectOnFinish: Boolean) {
         object : CountDownTimer(60000, 1000) {
 
             override fun onTick(millisUntilFinished: Long) {
@@ -445,21 +452,26 @@ class HomeFragment : Fragment() {
             }
 
             override fun onFinish() {
+                // [جدید] - بازگرداندن statusBarText به حالت پیش‌فرض
                 activity?.runOnUiThread {
                     updateStatusBar(getString(R.string.success_status), isError = false)
                 }
 
-                // [حفظ] - این بخش از کد اصلی شما برای اتصال خودکار حفظ می‌شود
-                // --- START: NEW CODE ADDED HERE ---
-                Toast.makeText(requireContext(), getString(R.string.countdown_finished_connecting), Toast.LENGTH_SHORT).show()
-                // وضعیت را به "متصل" تغییر داده و ذخیره می‌کنیم
-                isConnected = true
-                val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
-                sharedPref?.edit { putBoolean("is_connected_state", isConnected) }
+                // [جدید] - فقط در صورتی که از دکمه "اتصال" آمده باشد، وصل می‌شویم
+                if (shouldConnectOnFinish) {
+                    // [حفظ] - این بخش از کد اصلی شما برای اتصال خودکار حفظ می‌شود
+                    // --- START: NEW CODE ADDED HERE ---
+                    Toast.makeText(requireContext(), getString(R.string.countdown_finished_connecting), Toast.LENGTH_SHORT).show()
 
-                // تابع آپدیت دکمه را فراخوانی می‌کنیم تا اتصال برقرار شود
-                updateButtonState()
-                // --- END: NEW CODE ADDED HERE ---
+                    // وضعیت را به "متصل" تغییر داده و ذخیره می‌کنیم
+                    isConnected = true
+                    val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+                    sharedPref?.edit { putBoolean("is_connected_state", isConnected) }
+
+                    // تابع آپدیت دکمه را فراخوانی می‌کنیم تا اتصال برقرار شود
+                    updateButtonState()
+                    // --- END: NEW CODE ADDED HERE ---
+                }
             }
         }.start()
     }
