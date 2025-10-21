@@ -41,6 +41,7 @@ import android.text.style.StyleSpan
 import android.graphics.Typeface
 
 class HomeFragment : Fragment() {
+    private var activeTimer: CountDownTimer? = null
     private lateinit var vpnStateReceiver: BroadcastReceiver
     private var isConnected = false
     private var selectedDnsType: String = "Do53"
@@ -89,6 +90,7 @@ class HomeFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        checkForRunningTimer()
         loadLastData()
 
         val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
@@ -387,11 +389,32 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        activeTimer?.cancel()
+        activeTimer = null
         requireActivity().unregisterReceiver(vpnStateReceiver)
         _binding = null
     }
     private fun startCountdown(shouldConnectOnFinish: Boolean) {
-        object : CountDownTimer(60000, 1000) {
+        // زمان پایان را محاسبه و ذخیره می‌کنیم
+        val durationInMillis = 60000L
+        val finishTime = System.currentTimeMillis() + durationInMillis
+
+        val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+        sharedPref?.edit {
+            putLong(PREF_TIMER_FINISH_TIME, finishTime)
+            putBoolean(PREF_TIMER_SHOULD_CONNECT, shouldConnectOnFinish)
+            apply()
+        }
+
+        // تایمر را برای کل زمان (60 ثانیه) اجرا می‌کنیم
+        runTimer(durationInMillis, shouldConnectOnFinish)
+    }
+
+    private fun runTimer(durationInMillis: Long, shouldConnectOnFinish: Boolean) {
+        // اگر تایمر قبلی در حال اجرا بود، لغوش می‌کنیم
+        activeTimer?.cancel()
+
+        activeTimer = object : CountDownTimer(durationInMillis, 1000) {
 
             override fun onTick(millisUntilFinished: Long) {
                 val seconds = millisUntilFinished / 1000
@@ -452,27 +475,47 @@ class HomeFragment : Fragment() {
             }
 
             override fun onFinish() {
-                // [جدید] - بازگرداندن statusBarText به حالت پیش‌فرض
+                // [جدید] - داده‌های تایمر را از SharedPreferences پاک می‌کنیم
+                val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
+                sharedPref?.edit {
+                    remove(PREF_TIMER_FINISH_TIME)
+                    remove(PREF_TIMER_SHOULD_CONNECT)
+                    apply()
+                }
+
+                // [جدید] - متغیر تایمر را null می‌کنیم
+                activeTimer = null
+
+                // بازگرداندن statusBarText به حالت پیش‌فرض
                 activity?.runOnUiThread {
                     updateStatusBar(getString(R.string.success_status), isError = false)
                 }
 
-                // [جدید] - فقط در صورتی که از دکمه "اتصال" آمده باشد، وصل می‌شویم
+                // فقط در صورتی که از دکمه "اتصال" آمده باشد، وصل می‌شویم
                 if (shouldConnectOnFinish) {
-                    // [حفظ] - این بخش از کد اصلی شما برای اتصال خودکار حفظ می‌شود
-                    // --- START: NEW CODE ADDED HERE ---
                     Toast.makeText(requireContext(), getString(R.string.countdown_finished_connecting), Toast.LENGTH_SHORT).show()
-
-                    // وضعیت را به "متصل" تغییر داده و ذخیره می‌کنیم
                     isConnected = true
-                    val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)
                     sharedPref?.edit { putBoolean("is_connected_state", isConnected) }
-
-                    // تابع آپدیت دکمه را فراخوانی می‌کنیم تا اتصال برقرار شود
                     updateButtonState()
-                    // --- END: NEW CODE ADDED HERE ---
                 }
             }
         }.start()
+    }
+    private fun checkForRunningTimer() {
+        val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE) ?: return
+        val finishTime = sharedPref.getLong(PREF_TIMER_FINISH_TIME, 0)
+
+        // بررسی می‌کنیم آیا زمان پایان ذخیره شده و آیا هنوز زمان تمام نشده
+        if (finishTime > System.currentTimeMillis()) {
+            val remainingMillis = finishTime - System.currentTimeMillis()
+            val shouldConnect = sharedPref.getBoolean(PREF_TIMER_SHOULD_CONNECT, false)
+
+            // یک تایمر جدید برای زمان باقیمانده اجرا می‌کنیم
+            runTimer(remainingMillis, shouldConnect)
+        }
+    }
+    companion object {
+        private const val PREF_TIMER_FINISH_TIME = "timer_finish_time"
+        private const val PREF_TIMER_SHOULD_CONNECT = "timer_should_connect"
     }
 }
