@@ -66,4 +66,6 @@
     <string name="action_stop">Стоп</string>
     <string name="ip_update_timer_message">%1$d</string>
     <string name="countdown_finished_connecting">Время ожидания истекло, подключение...</string>
+    <string name="last_ip_label">Последний IP</string>
+    <string name="not_available">Н/Д</string>
 </resources>

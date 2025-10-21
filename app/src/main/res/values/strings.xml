@@ -66,6 +66,8 @@
     <string name="action_stop">Stop</string>
     <string name="ip_update_timer_message">%1$d</string>
     <string name="countdown_finished_connecting">Wait time finished, connecting...</string>
+    <string name="last_ip_label">Last IP</string>
+    <string name="not_available">N/A</string>
     <string-array name="dns_types">
         <item>Do53</item>
         <item>DoH</item>

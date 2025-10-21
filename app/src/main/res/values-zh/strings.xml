@@ -66,4 +66,6 @@
     <string name="action_stop">停止</string>
     <string name="ip_update_timer_message">%1$d</string>
     <string name="countdown_finished_connecting">等待时间结束，正在连接...</string>
+    <string name="last_ip_label">最后 IP</string>
+    <string name="not_available">不适用</string>
 </resources>

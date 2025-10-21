@@ -23,7 +23,6 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.text.DecimalFormat
 import android.os.CountDownTimer
 import android.widget.AdapterView
-import com.example.vexodns.MainActivity
 import android.app.Activity
 import androidx.activity.result.contract.ActivityResultContracts
 import android.content.Intent
@@ -40,7 +39,6 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.graphics.Typeface
 import java.text.NumberFormat
-import okhttp3.OkHttpClient
 
 class HomeFragment : Fragment() {
     private var activeTimer: CountDownTimer? = null
@@ -61,33 +59,16 @@ class HomeFragment : Fragment() {
 
     // یک نمونه از ApiService برای استفاده در کل کلاس
 // یک نمونه از ApiService برای استفاده در کل کلاس
+// یک نمونه از ApiService برای استفاده در کل کلاس
     private val apiService: ApiService by lazy {
         // Create a lenient Gson instance
         val gson = GsonBuilder()
             .setLenient()
             .create()
 
-        // [جدید] - ساخت یک OkHttpClient سفارشی
-        val okHttpClient = OkHttpClient.Builder()
-            .cache(null) // ۱. غیرفعال کردن کش دیسک (همانند قبل)
-            .addInterceptor { chain -> // ۲. [جدید] افزودن رهگیر برای هدرها
-                val originalRequest = chain.request()
-                val requestWithNoCache = originalRequest.newBuilder()
-                    // هدر اصلی برای HTTP/1.1
-                    .header("Cache-Control", "no-cache")
-                    // هدر قدیمی‌تر برای سازگاری با پراکسی‌های HTTP/1.0
-                    .header("Pragma", "no-cache")
-                    // (اختیاری) درخواست می‌کند که کش‌ها پاسخ را ذخیره نکنند
-                    .header("Cache-Control", "no-store")
-                    .build()
-                chain.proceed(requestWithNoCache)
-            }
-            .build()
-
         Retrofit.Builder()
             .baseUrl("https://example.com/")
-            .client(okHttpClient) // کلاینت سفارشی را به رتروفیت معرفی می‌کنیم
-            .addConverterFactory(GsonConverterFactory.create(gson))
+            .addConverterFactory(GsonConverterFactory.create(gson)) // Use the new lenient Gson
             .addConverterFactory(ScalarsConverterFactory.create())
             .build()
             .create(ApiService::class.java)
@@ -334,9 +315,19 @@ class HomeFragment : Fragment() {
                     val updateResponse = apiService.updateIp(updateIpUrl, updateRequest)
 
                     if (updateResponse.isSuccessful) {
+                        // یک نسخه جدید از subData با lastIp جدید می‌سازیم
+                        val updatedSubData = subData.copy(lastIp = publicIp)
+
+                        // UI و SharedPreferences را با داده جدید آپدیت می‌کنیم
+                        requireActivity().runOnUiThread { updateUi(updatedSubData) }
+                        val gson = Gson()
+                        val updatedJson = gson.toJson(updatedSubData)
+                        sharedPref.edit { putString("last_sub_data", updatedJson) }
+
                         updateStatusBar(getString(R.string.ip_changed_from_to, subData.lastIp ?: "N/A", publicIp), isError = false)
-                        return FetchResult(true, true, subData) // Needs countdown
-                    } else {
+                        return FetchResult(true, true, updatedSubData)
+                    }
+                    else {
                         val errorKey = if (updateResponse.code() == 409) R.string.ip_conflict_error else R.string.ip_update_fail
                         if (showErrors) updateStatusBar(getString(errorKey), isError = true)
                         return FetchResult(true, false, subData)
@@ -420,6 +411,7 @@ class HomeFragment : Fragment() {
             // [جدید] - فرمت کردن عدد و اضافه کردن " GB"
             "${numberFormat.format(remainingGb)} GB"
         }
+        binding.lastIpText.text = data.lastIp ?: getString(R.string.not_available)
         binding.statusBarText.text = getString(R.string.success_status)
     }
 
