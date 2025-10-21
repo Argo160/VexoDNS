@@ -21,11 +21,10 @@
 ## 📸 Screenshots
 
 <p align="center">
-  <em>(Dark Mode / Light Mode)</em>
+  <em>(VexoDNS App)</em>
   <br><br>
-  <img src="./dark.PNG" alt="Dark Mode Screenshot" width="400"/>
+  <img src="./image.png" alt="Dark Mode Screenshot" width="400"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="./light.png" alt="Light Mode Screenshot" width="400"/>
 </p>
 
 
