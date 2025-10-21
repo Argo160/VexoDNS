@@ -69,6 +69,8 @@
     <string name="last_ip_label">Last IP</string>
     <string name="not_available">N/A</string>
     <string name="feature_not_implemented">This feature is not implemented yet</string>
+    <string name="error_prefix">Error: %1$s</string>
+    <string name="subscription_not_active">Your subscription is not active</string>
     <string-array name="dns_types">
         <item>Do53</item>
         <item>DoH</item>

@@ -69,4 +69,6 @@
     <string name="last_ip_label">آخرین IP</string>
     <string name="not_available">نامشخص</string>
     <string name="feature_not_implemented">این قابلیت هنوز پیاده‌سازی نشده است</string>
+    <string name="error_prefix">خطا: %1$s</string>
+    <string name="subscription_not_active">اشتراک شما فعال نیست</string>
 </resources>

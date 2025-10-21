@@ -69,4 +69,6 @@
     <string name="last_ip_label">Последний IP</string>
     <string name="not_available">Н/Д</string>
     <string name="feature_not_implemented">Эта функция еще не реализована</string>
+    <string name="error_prefix">Ошибка: %1$s</string>
+    <string name="subscription_not_active">Ваша подписка неактивна</string>
 </resources>

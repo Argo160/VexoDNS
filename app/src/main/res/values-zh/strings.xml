@@ -69,4 +69,6 @@
     <string name="last_ip_label">最后 IP</string>
     <string name="not_available">不适用</string>
     <string name="feature_not_implemented">此功能尚未实现</string>
+    <string name="error_prefix">错误: %1$s</string>
+    <string name="subscription_not_active">您的订阅未激活</string>
 </resources>

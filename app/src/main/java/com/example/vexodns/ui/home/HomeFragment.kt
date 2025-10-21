@@ -137,7 +137,7 @@ class HomeFragment : Fragment() {
                     // Now check the result before connecting
                     if (result.wasSuccessful && result.subscriptionData != null) {
                         if (result.subscriptionData.statusKey != "table_status_active") {
-                            Toast.makeText(requireContext(), "اشتراک شما فعال نیست", Toast.LENGTH_LONG).show()
+                            Toast.makeText(requireContext(), getString(R.string.subscription_not_active), Toast.LENGTH_LONG).show()
                             resetConnectionState() // Revert the button
                         } else if (result.needsCountdown) {
                             startCountdown(shouldConnectOnFinish = true)
@@ -200,7 +200,7 @@ class HomeFragment : Fragment() {
     private fun startVpnService() {
         val dnsIp = lastSubscriptionData?.douIp1 // From your Python code logic
         if (dnsIp == null) {
-            Toast.makeText(requireContext(), "DNS IP not available from subscription", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.dns_ip_not_available), Toast.LENGTH_SHORT).show()
             // Reset button state if IP is not available
             isConnected = false
             binding.connectButtonLayout.setBackgroundResource(R.drawable.button_background_disconnected)
@@ -338,7 +338,7 @@ class HomeFragment : Fragment() {
             return FetchResult(true, false, subData)
 
         } catch (e: Exception) {
-            if (showErrors) handleError("خطا: ${e.message}")
+            if (showErrors) handleError(getString(R.string.error_prefix, e.message))
             return FetchResult(false, false, null)
         } finally {
             requireActivity().runOnUiThread { binding.progressBar.isVisible = false }
