@@ -13,4 +13,5 @@
     <color name="chip_color_red">#F44336</color>
     <color name="chip_color_orange">#FF9800</color>
     <color name="chip_color_gray">#9E9E9E</color>
+    <color name="timer_color">#007BFF</color>
 </resources>

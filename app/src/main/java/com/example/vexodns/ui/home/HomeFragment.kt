@@ -34,7 +34,11 @@ import com.google.gson.GsonBuilder
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
 import android.os.Build
-
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
+import android.graphics.Typeface
 
 class HomeFragment : Fragment() {
     private lateinit var vpnStateReceiver: BroadcastReceiver
@@ -99,7 +103,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-        // --- New Connect Button Logic ---
+// --- New Connect Button Logic ---
         binding.connectButtonLayout.setOnClickListener {
             // First, check if the right DNS type is selected
             if (selectedDnsType != "Do53") {
@@ -125,8 +129,7 @@ class HomeFragment : Fragment() {
                             resetConnectionState() // Revert the button
                         } else if (result.needsCountdown) {
                             startCountdown()
-                            Toast.makeText(requireContext(), "IP در حال آپدیت است، پس از اتمام تایمر دوباره تلاش کنید", Toast.LENGTH_LONG).show()
-                            resetConnectionState() // Revert the button
+
                         } else {
                             // Everything is OK, proceed with connection
                             updateButtonState()
@@ -381,32 +384,74 @@ class HomeFragment : Fragment() {
         _binding = null
     }
     private fun startCountdown() {
-        // دکمه Fetch و منوی همبرگری را غیرفعال می‌کنیم
-        binding.fetchButton.isEnabled = false
-        (activity as? MainActivity)?.setDrawerEnabled(false)
-
-        // لایه تایمر را نمایش می‌دهیم
-        binding.timerOverlay.isVisible = true
-
         object : CountDownTimer(60000, 1000) {
 
             override fun onTick(millisUntilFinished: Long) {
                 val seconds = millisUntilFinished / 1000
-                // فقط عدد ثانیه را در TextView وسط دایره نمایش می‌دهیم
-                binding.timerTextOverlay.text = seconds.toString()
+
+                // 1. متن‌های دو خط را می‌گیریم
+                val line1 = try {
+                    getString(R.string.timer_text_title)
+                } catch (e: Exception) { "IP update in progress, please wait..." }
+
+                val line2 = try {
+                    // همان رشته "%1$d" که فقط عدد را برمی‌گرداند
+                    getString(R.string.ip_update_timer_message, seconds)
+                } catch (e: Exception) { seconds.toString() }
+
+                // 2. پیام کامل را می‌سازیم
+                val fullMessage = "$line1\n$line2"
+                val spannable = SpannableString(fullMessage)
+
+                // 3. رنگ‌های مورد نیاز را از ریسورس‌ها می‌خوانیم
+                val defaultColor = try {
+                    ContextCompat.getColor(requireContext(), R.color.green) // رنگ خط اول
+                } catch (e: Exception) { 0xFF008000.toInt() } // سبز جایگزین
+
+                val timerColor = try {
+                    ContextCompat.getColor(requireContext(), R.color.timer_color) // رنگ تایمر
+                } catch (e: Exception) { 0xFF007BFF.toInt() } // آبی جایگزین
+
+                // 4. اندیس شروع و پایان خط دوم (تایمر) را محاسبه می‌کنیم
+                val startIndexOfLine2 = line1.length + 1 // +1 برای کاراکتر \n
+                val endIndexOfLine2 = fullMessage.length
+
+                // 5. استایل خط اول (فقط رنگ سبز)
+                spannable.setSpan(
+                    ForegroundColorSpan(defaultColor),
+                    0, // شروع متن
+                    line1.length, // پایان خط اول
+                    Spannable.SPAN_INCLUSIVE_INCLUSIVE
+                )
+
+                // 6. استایل خط دوم (بولد + رنگ مخصوص تایمر)
+                spannable.setSpan(
+                    StyleSpan(Typeface.BOLD), // بولد کردن
+                    startIndexOfLine2,
+                    endIndexOfLine2,
+                    Spannable.SPAN_INCLUSIVE_INCLUSIVE
+                )
+                spannable.setSpan(
+                    ForegroundColorSpan(timerColor), // رنگی کردن
+                    startIndexOfLine2,
+                    endIndexOfLine2,
+                    Spannable.SPAN_INCLUSIVE_INCLUSIVE
+                )
+
+                // 7. متن استایل‌دهی شده را مستقیماً به TextView اعمال می‌کنیم
+                activity?.runOnUiThread {
+                    binding.statusBarText.text = spannable
+                }
             }
 
             override fun onFinish() {
-                // لایه تایمر را مخفی می‌کنیم
-                binding.timerOverlay.isVisible = false
-                // دکمه و منو را دوباره فعال می‌کنیم
-                binding.fetchButton.isEnabled = true
-                (activity as? MainActivity)?.setDrawerEnabled(true)
+                activity?.runOnUiThread {
+                    updateStatusBar(getString(R.string.success_status), isError = false)
+                }
 
+                // [حفظ] - این بخش از کد اصلی شما برای اتصال خودکار حفظ می‌شود
                 // --- START: NEW CODE ADDED HERE ---
-                // به صورت خودکار فرآیند اتصال را دوباره شروع می‌کنیم
-                Toast.makeText(requireContext(), "زمان انتظار به پایان رسید، در حال اتصال...", Toast.LENGTH_SHORT).show()
-
+                Toast.makeText(requireContext(), getString(R.string.countdown_finished_connecting), Toast.LENGTH_SHORT).show()
                 // وضعیت را به "متصل" تغییر داده و ذخیره می‌کنیم
                 isConnected = true
                 val sharedPref = activity?.getSharedPreferences("VexoDNSPrefs", Context.MODE_PRIVATE)

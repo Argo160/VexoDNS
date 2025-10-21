@@ -64,4 +64,6 @@
     <string name="status_connected">متصل</string>
     <string name="status_not_connected">غیرمتصل</string>
     <string name="action_stop">توقف</string>
+    <string name="ip_update_timer_message">%1$d</string>
+    <string name="countdown_finished_connecting">زمان انتظار به پایان رسید، در حال اتصال...</string>
 </resources>
