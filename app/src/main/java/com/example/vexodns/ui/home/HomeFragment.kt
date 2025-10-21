@@ -40,6 +40,7 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.graphics.Typeface
 import java.text.NumberFormat
+import okhttp3.OkHttpClient
 
 class HomeFragment : Fragment() {
     private var activeTimer: CountDownTimer? = null
@@ -59,15 +60,34 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     // یک نمونه از ApiService برای استفاده در کل کلاس
+// یک نمونه از ApiService برای استفاده در کل کلاس
     private val apiService: ApiService by lazy {
         // Create a lenient Gson instance
         val gson = GsonBuilder()
             .setLenient()
             .create()
 
+        // [جدید] - ساخت یک OkHttpClient سفارشی
+        val okHttpClient = OkHttpClient.Builder()
+            .cache(null) // ۱. غیرفعال کردن کش دیسک (همانند قبل)
+            .addInterceptor { chain -> // ۲. [جدید] افزودن رهگیر برای هدرها
+                val originalRequest = chain.request()
+                val requestWithNoCache = originalRequest.newBuilder()
+                    // هدر اصلی برای HTTP/1.1
+                    .header("Cache-Control", "no-cache")
+                    // هدر قدیمی‌تر برای سازگاری با پراکسی‌های HTTP/1.0
+                    .header("Pragma", "no-cache")
+                    // (اختیاری) درخواست می‌کند که کش‌ها پاسخ را ذخیره نکنند
+                    .header("Cache-Control", "no-store")
+                    .build()
+                chain.proceed(requestWithNoCache)
+            }
+            .build()
+
         Retrofit.Builder()
             .baseUrl("https://example.com/")
-            .addConverterFactory(GsonConverterFactory.create(gson)) // Use the new lenient Gson
+            .client(okHttpClient) // کلاینت سفارشی را به رتروفیت معرفی می‌کنیم
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .addConverterFactory(ScalarsConverterFactory.create())
             .build()
             .create(ApiService::class.java)
