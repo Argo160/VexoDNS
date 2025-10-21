@@ -39,6 +39,7 @@ import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.graphics.Typeface
+import java.text.NumberFormat
 
 class HomeFragment : Fragment() {
     private var activeTimer: CountDownTimer? = null
@@ -375,8 +376,29 @@ class HomeFragment : Fragment() {
             getString(R.string.unlimited)
         } else {
             val remainingGb = (data.allowedVolumeGb ?: 0.0) - (data.usedVolumeGb ?: 0.0)
-            // Formatting the number and adding " GB"
-            "${DecimalFormat("#.##").format(remainingGb)} GB"
+
+            // [جدید] - دریافت لوکال (زبان) فعلی که برنامه در حال نمایش آن است
+            val currentLocale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                resources.configuration.locales[0]
+            } else {
+                @Suppress("DEPRECATION")
+                resources.configuration.locale
+            }
+
+            // [جدید] - ساخت یک فرمت‌دهنده عدد بر اساس لوکال فعلی
+            val numberFormat = NumberFormat.getNumberInstance(currentLocale)
+
+            // [جدید] - تنظیمات فرمت‌دهنده (حداکثر ۲ رقم اعشار)
+            if (numberFormat is DecimalFormat) {
+                // از الگوی قبلی شما استفاده می‌کنیم تا مطمئن شویم "." یا "٫" درست کار می‌کند
+                numberFormat.applyPattern("#.##")
+            } else {
+                // یک روش استاندارد جایگزین
+                numberFormat.maximumFractionDigits = 2
+            }
+
+            // [جدید] - فرمت کردن عدد و اضافه کردن " GB"
+            "${numberFormat.format(remainingGb)} GB"
         }
         binding.statusBarText.text = getString(R.string.success_status)
     }
