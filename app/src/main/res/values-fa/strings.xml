@@ -68,4 +68,5 @@
     <string name="countdown_finished_connecting">زمان انتظار به پایان رسید، در حال اتصال...</string>
     <string name="last_ip_label">آخرین IP</string>
     <string name="not_available">نامشخص</string>
+    <string name="feature_not_implemented">این قابلیت هنوز پیاده‌سازی نشده است</string>
 </resources>

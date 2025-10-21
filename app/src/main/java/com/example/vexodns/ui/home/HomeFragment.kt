@@ -115,10 +115,11 @@ class HomeFragment : Fragment() {
         }
 
         // --- New Connect Button Logic ---
+        // --- New Connect Button Logic ---
         binding.connectButtonLayout.setOnClickListener {
-            // First, check if the right DNS type is selected
+            // [اصلاح] - بررسی نوع DNS و استفاده از کلید زبانی
             if (selectedDnsType != "Do53") {
-                Toast.makeText(requireContext(), "این قابلیت هنوز پیاده‌سازی نشده است", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.feature_not_implemented), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -173,9 +174,11 @@ class HomeFragment : Fragment() {
         }
         binding.dnsTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val selectedDnsType = parent?.getItemAtPosition(position).toString()
-                // اینجا می‌توانید منطق خود را اضافه کنید، فعلاً یک پیام Toast نمایش می‌دهیم
-                Toast.makeText(requireContext(), "Selected: $selectedDnsType", Toast.LENGTH_SHORT).show()
+                // [اصلاح] - متغیر سطح کلاس را آپدیت می‌کنیم
+                this@HomeFragment.selectedDnsType = parent?.getItemAtPosition(position).toString()
+
+                // این Toast اختیاری است و می‌توانید آن را حذف کنید
+                // Toast.makeText(requireContext(), "Selected: ${this@HomeFragment.selectedDnsType}", Toast.LENGTH_SHORT).show()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {

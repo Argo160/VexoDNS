@@ -68,6 +68,7 @@
     <string name="countdown_finished_connecting">Wait time finished, connecting...</string>
     <string name="last_ip_label">Last IP</string>
     <string name="not_available">N/A</string>
+    <string name="feature_not_implemented">This feature is not implemented yet</string>
     <string-array name="dns_types">
         <item>Do53</item>
         <item>DoH</item>
