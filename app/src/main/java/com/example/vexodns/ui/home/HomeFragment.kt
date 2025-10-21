@@ -267,19 +267,11 @@ class HomeFragment : Fragment() {
             }
             val subData = subResponse.body()!!
 
-            requireActivity().runOnUiThread { updateUi(subData) }
-
-            val gson = Gson()
-            val subDataJson = gson.toJson(subData)
-            sharedPref.edit { putString("last_sub_data", subDataJson) }
-
             val publicIp: String? = try {
-                // تلاش برای سرویس اول
                 val response1 = apiService.getPublicIp("https://icanhazip.com")
                 if (response1.isSuccessful && !response1.body().isNullOrBlank()) {
                     response1.body()!!.trim()
                 } else {
-                    // در صورت عدم موفقیت، تلاش برای سرویس دوم
                     val response2 = apiService.getPublicIp("https://v4.ident.me")
                     if (response2.isSuccessful && !response2.body().isNullOrBlank()) {
                         response2.body()!!.trim()
@@ -288,7 +280,6 @@ class HomeFragment : Fragment() {
                     }
                 }
             } catch (e: Exception) {
-                // اگر سرویس اول با خطا مواجه شد (مثلا قطعی شبکه)، سرویس دوم را امتحان کن
                 try {
                     val response2 = apiService.getPublicIp("https://v4.ident.me")
                     if (response2.isSuccessful && !response2.body().isNullOrBlank()) {
@@ -297,14 +288,13 @@ class HomeFragment : Fragment() {
                         null
                     }
                 } catch (e2: Exception) {
-                    null // هر دو سرویس شکست خوردند
+                    null
                 }
             }
 
-            // بررسی نهایی
             if (publicIp == null) {
                 if (showErrors) updateStatusBar(getString(R.string.ip_not_found), isError = true)
-                return FetchResult(true, false, subData) // Data fetch was successful, but IP check failed
+                return FetchResult(true, false, subData)
             }
 
             if (publicIp != subData.lastIp) {
@@ -315,7 +305,7 @@ class HomeFragment : Fragment() {
                     val updateResponse = apiService.updateIp(updateIpUrl, updateRequest)
 
                     if (updateResponse.isSuccessful) {
-                        // یک نسخه جدید از subData با lastIp جدید می‌سازیم
+                        // IP جدید را در subData ذخیره می‌کنیم
                         val updatedSubData = subData.copy(lastIp = publicIp)
 
                         // UI و SharedPreferences را با داده جدید آپدیت می‌کنیم
@@ -326,8 +316,7 @@ class HomeFragment : Fragment() {
 
                         updateStatusBar(getString(R.string.ip_changed_from_to, subData.lastIp ?: "N/A", publicIp), isError = false)
                         return FetchResult(true, true, updatedSubData)
-                    }
-                    else {
+                    } else {
                         val errorKey = if (updateResponse.code() == 409) R.string.ip_conflict_error else R.string.ip_update_fail
                         if (showErrors) updateStatusBar(getString(errorKey), isError = true)
                         return FetchResult(true, false, subData)
@@ -336,7 +325,14 @@ class HomeFragment : Fragment() {
             } else {
                 updateStatusBar(getString(R.string.ip_no_change, publicIp), isError = false)
             }
-            return FetchResult(true, false, subData) // Everything successful, no countdown needed
+
+            // در انتها یکبار UI و SharedPreferences را آپدیت می‌کنیم
+            requireActivity().runOnUiThread { updateUi(subData) }
+            val gson = Gson()
+            val subDataJson = gson.toJson(subData)
+            sharedPref.edit { putString("last_sub_data", subDataJson) }
+
+            return FetchResult(true, false, subData)
 
         } catch (e: Exception) {
             if (showErrors) handleError("خطا: ${e.message}")
