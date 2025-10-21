@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./logo.jpg" alt="Vexo Subscription Checker Logo" width="150"/>
+</p>
+
 <h1 align="center">VexoDNS for Android</h1>
 
 <p align="center">
